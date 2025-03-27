@@ -75,4 +75,3 @@ ChatPulse is a full‑stack real‑time chat application built using the MERN st
 - 🛠 **Advanced Profile Customization** (custom avatars, status updates)
 - 🌐 **Multi-language Support**
 - 📑 **Message Reactions, Edits & Deletions**
->>>>>>> 73538e0 (init)
