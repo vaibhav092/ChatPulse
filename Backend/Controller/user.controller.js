@@ -112,6 +112,31 @@ const RefreshAcesstoken=asyncHandler(async (req,res) => {
 
 })
 
+const logoutUser =asyncHandler( async (req,res) =>{
+    await User.findByIdAndUpdate(req.user._id,{
+        $set:{
+            refreshToken:undefined
+        }
+        })
+        const options={
+            httpOnly:true,
+            secure:true,}
+
+    return res
+    .status(200)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken",options)
+    .json({message:"Logout successfull"})
+})
+const islogin=asyncHandler(async (req,res) => {
+    const user=req?.user
+    if(user){
+        return res.status(202).json({isloggedin:true})
+    }else{
+        return res.status(202).json({isloggedin:false})
+    }
+}
+)
 export {
-    registerUser,loginUser,RefreshAcesstoken
+    registerUser,loginUser,RefreshAcesstoken,logoutUser,islogin
 }
