@@ -24,14 +24,14 @@ const registerUser=asyncHandler(async (req,res) => {
     }
 
     const existUser=await User.findOne({
-        $or:[{username},{email}]
+        $or:[{username}]
     })
     
     if(existUser){
         throw new Error("User Already exist")
     }
 
-    const pfpPath=req.files?.avatar?.path
+    const pfpPath=req.files?.pfp[0].path
     if(!pfpPath){
         throw new Error("Path Don't exist ")
     }
@@ -40,7 +40,7 @@ const registerUser=asyncHandler(async (req,res) => {
         username,
         email,
         password,
-        pfp:pfpLink||""
+        pfp:pfpLink.url||""
     })
 
     return res.status(201).json({
@@ -53,13 +53,14 @@ const loginUser=asyncHandler(async (req,res) => {
     if ([username,password].some((x)=>x?.trim()==="")) {
         throw new Error("All fields are required ")
     }
-    const user=await User.findOne({
-        $or:[{username}]
-    })
+    const user = await User.findOne({
+        $or: [{ username}]
+    });
+    
     if(!user){
         throw new Error("No User Exist")
     }
-    const passwordValid=await existUser.isPasswordCorrect(password)
+    const passwordValid=await user.isPasswordCorrect(password)
 
     if(!passwordValid){
         throw new Error("Password incorrect")
@@ -76,7 +77,7 @@ const loginUser=asyncHandler(async (req,res) => {
         .status(200)
         .cookie("accessToken",accessToken,options)
         .cookie("refreshToken",refreshToken,options)
-        .json(new ApiRes(200,{user:logedinUser,accessToken,refreshToken},"Login successfull"))
+        .json({user:logedinUser,accessToken,refreshToken})
 
 
 })
@@ -93,7 +94,7 @@ const RefreshAcesstoken=asyncHandler(async (req,res) => {
         throw new Error("refresh Token Error")
     }
 
-    const user = await User.findById(decoded.userId);
+    const user = await User.findById(decoded.id);
     if(!user){
         throw new Error("User not found /TOken mismatch")
     }
@@ -113,7 +114,7 @@ const RefreshAcesstoken=asyncHandler(async (req,res) => {
 })
 
 const logoutUser =asyncHandler( async (req,res) =>{
-    await User.findByIdAndUpdate(req.user._id,{
+    await User.findByIdAndUpdate(req.user.id,{
         $set:{
             refreshToken:undefined
         }
@@ -130,10 +131,10 @@ const logoutUser =asyncHandler( async (req,res) =>{
 })
 const islogin=asyncHandler(async (req,res) => {
     const user=req?.user
-    if(user){
-        return res.status(202).json({isloggedin:true})
-    }else{
+    if(!user){
         return res.status(202).json({isloggedin:false})
+    }else{
+        return res.status(202).json({isloggedin:true})
     }
 }
 )
