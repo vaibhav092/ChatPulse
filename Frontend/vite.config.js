@@ -10,12 +10,6 @@ export default defineConfig({
                 changeOrigin: true,
                 secure: false,
             },
-            '/static': {
-                // Add this block
-                target: 'http://localhost:8000',
-                changeOrigin: true,
-                secure: false,
-            },
         },
     },
 })

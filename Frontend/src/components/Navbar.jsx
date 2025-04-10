@@ -1,22 +1,71 @@
-import React from 'react'
+import React from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { MessageSquare, LogIn, UserPlus, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { logout } from '../utils/api';
 
 function Navbar() {
-    return (
-        <>
-            <nav className="bg-[#87CEEB] text-[#36454F] shadow-md">
-                <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <h1 className="text-xl font-semibold">ChatPulse</h1>
-                    <div className="flex items-center gap-4">
-                        <button className="bg-[#6495ED] text-white px-4 py-2 rounded-lg hover:bg-[#5a85d1] transition">
-                            Login
+    const { isAuthenticated, setIsAuthenticated,} = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const handleLogout = async () => {
+        try {
+          await logout();
+          setIsAuthenticated(false);
+          navigate('/');
+        } catch (error) {
+          console.error('Logout failed:', error);
+        }
+      };
+    
+    return(
+        <nav className="bg-sky-500 text-white p-4 shadow-lg">
+            <div className="container mx-auto flex justify-between items-center">
+                <Link
+                    to="/"
+                    className="flex items-center space-x-2 hover:text-sky-100"
+                >
+                    <MessageSquare className="h-6 w-6" />
+                    <span className="text-xl font-bold">ChatApp</span>
+                </Link>
+                <div className="flex items-center space-x-4">
+                    {!isAuthenticated ? (
+                        <>
+                            <Link
+                                to="/login"
+                                className={`flex items-center space-x-1 hover:text-sky-100 ${
+                                    location.pathname === '/login'
+                                        ? 'text-sky-200'
+                                        : ''
+                                }`}
+                            >
+                                <LogIn className="h-5 w-5" />
+                                <span>Login</span>
+                            </Link>
+                            <Link
+                                to="/register"
+                                className={`flex items-center space-x-1 hover:text-sky-100 ${
+                                    location.pathname === '/register'
+                                        ? 'text-sky-200'
+                                        : ''
+                                }`}
+                            >
+                                <UserPlus className="h-5 w-5" />
+                                <span>Register</span>
+                            </Link>
+                        </>
+                    ) : (
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center space-x-1 hover:text-sky-100"
+                        >
+                            <LogOut className="h-5 w-5" />
+                            <span>Logout</span>
                         </button>
-                        <button className="bg-[#E6E6FA] text-[#36454F] px-4 py-2 rounded-lg hover:bg-[#d8d8f0] transition">
-                            Signup
-                        </button>
-                    </div>
+                    )}
                 </div>
-            </nav>
-        </>
+            </div>
+        </nav>
     )
 }
 
