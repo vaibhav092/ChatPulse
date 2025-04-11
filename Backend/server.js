@@ -11,12 +11,17 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const httpServer = createServer(app);
-const io = new Server(httpServer);
+const io = new Server(httpServer, {
+    cors: {
+        origin: "http://localhost:5173", 
+        methods: ["GET", "POST"],
+        credentials: true
+    }
+});
 
-io.on("connection",socket=>{
-    console.log(socket.id);
-})
+import { socketController } from "./Controller/socket.Controller.js";
 
+socketController(io)
 
 app.use(cors({
     origin: 'http://localhost:5173',
@@ -53,7 +58,7 @@ async function connectDb() {
 }
 
 connectDb().then(()=>{
-    app.listen(PORT,()=>{
+    httpServer.listen(PORT,()=>{
         console.log("Server is running on",PORT);})  
 }).catch((error)=>{
     console.log("Error",error);

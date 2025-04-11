@@ -138,6 +138,16 @@ const islogin=asyncHandler(async (req,res) => {
     }
 }
 )
+const userInfo=asyncHandler(async (req,res) => {
+    const { username } = req.body;
+    const user = await User.findOne({ username: username.toLowerCase() }, { pfp: 1, _id: 0 });
+    const profilePicture = user ? user.pfp : null;
+
+    return res.status(200).json({
+        username,
+        pfp:profilePicture
+    })
+})
 export {
-    registerUser,loginUser,RefreshAcesstoken,logoutUser,islogin
+    registerUser,loginUser,RefreshAcesstoken,logoutUser,islogin,userInfo
 }
