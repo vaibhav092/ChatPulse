@@ -65,4 +65,10 @@ export const checkAuth = async () => {
     return res.data
 }
 
+export const getpfp = async (username) => {
+    const res = await api.post('/user/getpfp', { username });
+    return res.data;
+};
+
+
 export default api

@@ -10,16 +10,17 @@ function Navbar() {
     const location = useLocation();
     const handleLogout = async () => {
         try {
-          await logout();
-          setIsAuthenticated(false);
-          navigate('/');
+            await logout();
+            setIsAuthenticated(false);
+            navigate('/');
         } catch (error) {
-          console.error('Logout failed:', error);
+            console.log(isAuthenticated);
+            console.error('Logout failed:', error);
         }
       };
     
     return(
-        <nav className="bg-sky-500 text-white p-4 shadow-lg">
+        <nav className="bg-sky-500 text-white p-2 shadow-lg">
             <div className="container mx-auto flex justify-between items-center">
                 <Link
                     to="/"
