@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { getpfp } from '../utils/api';
+import React, { useContext, useEffect, useState,useCallback } from 'react';
+import { fetchContact, getpfp } from '../utils/api';
 import { ChatContext } from '../context/ChatContext';
 
 function ChatList() {
@@ -7,7 +7,15 @@ function ChatList() {
 
     const [dataSend, setDataSend] = useState([]);
     const [searchUsername, setSearchUsername] = useState("");
-
+    const fetchData = useCallback(() => {
+        fetchContact()
+            .then(contacts => setDataSend(contacts.data))
+            .catch(err => console.error(err));
+      }, []); // If fetchContact is static or imported, it's safe here. Add dependencies if needed.
+    
+        useEffect(() => {
+        fetchData();
+        }, [fetchData]);
     const handleSearch = async () => {
         try {
             const data1 = await getpfp(searchUsername.trim());
@@ -19,7 +27,7 @@ function ChatList() {
 
             // Avoid duplicates
             if (!dataSend.some(user => user.username === data1.username)) {
-                setDataSend(prev => [...prev, data1]);
+                setDataSend(prev => [ data1,...prev]);
             }
 
             setSearchUsername(""); // Clear input after search

@@ -70,5 +70,9 @@ export const getpfp = async (username) => {
     return res.data;
 };
 
+export const fetchContact=async()=>{
+    const res=await api.get('/user/getContacts')
+    return res.data;
+}
 
 export default api

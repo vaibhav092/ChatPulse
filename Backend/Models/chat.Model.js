@@ -10,7 +10,7 @@ const chatSchema = new Schema(
         lastMessage: {
             type: Schema.Types.ObjectId,
             ref: 'Message'
-        },
+        }, 
         unreadCount: {
             type: Number,
             default: 0

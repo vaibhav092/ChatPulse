@@ -1,21 +1,42 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ChatContext } from '../context/ChatContext';
 import MessageBox from './MessageBox.jsx'; // typing component
 import MessageBubble from './Message.jsx'; // rendering messages
+import { SocketContext } from "../context/SocketContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 function ChatWindow() {
+    const { username } = useAuth();
+    const { socket } = useContext(SocketContext);
     const { currentChat } = useContext(ChatContext);
     const [messages, setMessages] = useState([]);
 
+    // Emit 'setup' when username is available
+    useEffect(() => {
+        if (username) {
+            console.log("Emitting setup for:", username); // ✅ Confirm this logs
+            socket.emit("setup", username);
+        }
+    }, [socket, username]);
+
+    // Handling the sending of a message
     const handleSendMessage = (newMessage) => {
         const msg = {
             message: newMessage,
             isSender: true,
             timestamp: new Date().toLocaleTimeString(),
         };
-        setMessages([...messages, msg]);
-    };
 
+        // Emit 'sendMessage' with the correct usernames and content
+        socket.emit("sendMessage", {
+            senderUsername: username,  // sender's username
+            receiverUsername: currentChat,  // receiver's username (assuming currentChat holds the receiver's username)
+            content: newMessage,
+        });
+
+        // Update the state with the new message (non-async update)
+        setMessages((prevMessages) => [...prevMessages, msg]);
+    };
     return (
         <div className="flex flex-col h-full bg-gradient-to-r from-slate-900 to-blue-950 rounded text-amber-50 text-xl font-bold">
             {/* Header */}

@@ -48,7 +48,9 @@ const Register = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
+    <div className=' h-screen  bg-yellow-200 flex flex-col justify-center'>
+
+    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8 mt-38">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Create an Account</h2>
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">{error}</div>
@@ -120,6 +122,10 @@ const Register = () => {
           </button>
         </div>
       </form>
+    </div>
+    <div className='w-100 h-120'>
+
+    </div>
     </div>
   );
 };

@@ -134,20 +134,45 @@ const islogin=asyncHandler(async (req,res) => {
     if(!user){
         return res.status(202).json({isloggedin:false})
     }else{
-        return res.status(202).json({isloggedin:true})
+        return res.status(202).json({
+            username:user.username,
+            isloggedin:true
+        })
     }
 }
 )
 const userInfo=asyncHandler(async (req,res) => {
+    const user = req.user;
     const { username } = req.body;
-    const user = await User.findOne({ username: username.toLowerCase() }, { pfp: 1, _id: 0 });
-    const profilePicture = user ? user.pfp : null;
+
+    const newUser = await User.findOne(
+        { username: username.toLowerCase() },
+        { _id: 1, pfp: 1, username: 1 }
+    );
+
+    if (!newUser) {
+        throw new Error("No user found with that username");
+    }
+
+    if (!user.contacts.includes(newUser._id)) {
+        user.contacts.push(newUser._id);
+        await user.save();
+    }
 
     return res.status(200).json({
-        username,
-        pfp:profilePicture
-    })
-})
+        username: newUser.username,
+        pfp: newUser.pfp
+    });
+});
+
+const fetchContacts = asyncHandler(async (req, res) => {
+    const user = req.user;
+    await user.populate('contacts', '_id pfp username');
+    return res.status(200).json({
+        data: user.contacts
+    });
+});
+
 export {
-    registerUser,loginUser,RefreshAcesstoken,logoutUser,islogin,userInfo
+    registerUser,loginUser,RefreshAcesstoken,logoutUser,islogin,userInfo,fetchContacts
 }
