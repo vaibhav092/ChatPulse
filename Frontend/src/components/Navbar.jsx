@@ -1,25 +1,25 @@
-import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { MessageSquare, LogIn, UserPlus, LogOut } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { logout } from '../utils/api';
+import React from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { MessageSquare, LogIn, UserPlus, LogOut } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
+import { logout } from '../utils/api'
 
 function Navbar() {
-    const { isAuthenticated, setIsAuthenticated,} = useAuth();
-    const navigate = useNavigate();
-    const location = useLocation();
+    const { isAuthenticated, setIsAuthenticated } = useAuth()
+    const navigate = useNavigate()
+    const location = useLocation()
     const handleLogout = async () => {
         try {
-            await logout();
-            setIsAuthenticated(false);
-            navigate('/');
+            await logout()
+            setIsAuthenticated(false)
+            navigate('/')
         } catch (error) {
-            console.log(isAuthenticated);
-            console.error('Logout failed:', error);
+            console.log(isAuthenticated)
+            console.error('Logout failed:', error)
         }
-      };
-    
-    return(
+    }
+
+    return (
         <nav className="bg-sky-500 text-white p-2 shadow-lg">
             <div className="container mx-auto flex justify-between items-center">
                 <Link

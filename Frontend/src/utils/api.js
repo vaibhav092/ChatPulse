@@ -66,13 +66,13 @@ export const checkAuth = async () => {
 }
 
 export const getpfp = async (username) => {
-    const res = await api.post('/user/getpfp', { username });
-    return res.data;
-};
+    const res = await api.post('/user/getpfp', { username })
+    return res.data
+}
 
-export const fetchContact=async()=>{
-    const res=await api.get('/user/getContacts')
-    return res.data;
+export const fetchContact = async () => {
+    const res = await api.get('/user/getContacts')
+    return res.data
 }
 
 export default api
