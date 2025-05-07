@@ -160,6 +160,7 @@ const userInfo=asyncHandler(async (req,res) => {
     }
 
     return res.status(200).json({
+        id:newUser._id,
         username: newUser.username,
         pfp: newUser.pfp
     });

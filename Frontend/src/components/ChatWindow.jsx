@@ -1,71 +1,60 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { ChatContext } from '../context/ChatContext';
-import MessageBox from './MessageBox.jsx'; // typing component
-import MessageBubble from './Message.jsx'; // rendering messages
-import { SocketContext } from "../context/SocketContext.jsx";
-import { useAuth } from "../context/AuthContext.jsx";
+import React, { useContext, useState } from 'react'
+import { ChatContext } from '../context/ChatContext'
 
 function ChatWindow() {
-    const { username } = useAuth();
-    const { socket } = useContext(SocketContext);
-    const { currentChat } = useContext(ChatContext);
-    const [messages, setMessages] = useState([]);
+    const { currentChat} = useContext(ChatContext)
+    const [message, setMessage] = useState('')
+    const [messages, setMessages] = useState([])
 
-    // Emit 'setup' when username is available
-    useEffect(() => {
-        if (username) {
-            console.log("Emitting setup for:", username); // ✅ Confirm this logs
-            socket.emit("setup", username);
-        }
-    }, [socket, username]);
 
-    // Handling the sending of a message
-    const handleSendMessage = (newMessage) => {
-        const msg = {
-            message: newMessage,
-            isSender: true,
-            timestamp: new Date().toLocaleTimeString(),
-        };
+    const handleSend = () => {
+        if (message.trim() === '') return
+        setMessages(prev => [...prev, { text: message, sender: 'me' }])
+        setMessage('')
+    }
 
-        // Emit 'sendMessage' with the correct usernames and content
-        socket.emit("sendMessage", {
-            senderUsername: username,  // sender's username
-            receiverUsername: currentChat,  // receiver's username (assuming currentChat holds the receiver's username)
-            content: newMessage,
-        });
-
-        // Update the state with the new message (non-async update)
-        setMessages((prevMessages) => [...prevMessages, msg]);
-    };
     return (
-        <div className="flex flex-col h-full bg-gradient-to-r from-slate-900 to-blue-950 rounded text-amber-50 text-xl font-bold">
+        <div className="flex flex-col h-dvh w-full rounded-2xl">
             {/* Header */}
-            <div className="p-4 border-b border-slate-700">
-                Chatting with: {currentChat}
+            <div className="p-4 bg-gray-800 border-b border-gray-700">
+                <h2 className="text-white font-semibold text-lg">
+                    {currentChat.username}
+                </h2>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-2">
-                {messages.length === 0 ? (
-                    <p className="text-gray-400 italic px-4">No messages yet...</p>
-                ) : (
-                    messages.map((msg, i) => (
-                        <MessageBubble
-                            key={i}
-                            message={msg.message}
-                            isSender={msg.isSender}
-                            timestamp={msg.timestamp}
-                        />
-                    ))
-                )}
-            </div >
-                <div className='mb-7'>
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                {messages.map((msg, index) => (
+                    <div
+                        key={index}
+                        className={`max-w-xs p-2 rounded-lg text-white ${
+                            msg.sender === 'me' ? 'bg-blue-600 ml-auto' : 'bg-gray-700'
+                        }`}
+                    >
+                        {msg.text}
+                    </div>
+                ))}
+            </div>
 
-            {/* Typing box */}
-            <MessageBox onSend={handleSendMessage} />
-                </div>
+            {/* Input */}
+            <div className="p-3 border-t border-gray-700 bg-gray-800 flex items-center mb-11 rounded-2xl">
+                <input
+                    type="text"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                    placeholder="Type a message..."
+                    className="flex-1 py-2 px-3 rounded text-white focus:outline-none mr-2"
+                />
+                <button
+                    onClick={handleSend}
+                    className="bg-blue-600 px-4 py-2 rounded-lg text-white hover:bg-blue-700"
+                >
+                    Send
+                </button>
+            </div>
         </div>
-    );
+    )
 }
 
-export default ChatWindow;
+export default ChatWindow
