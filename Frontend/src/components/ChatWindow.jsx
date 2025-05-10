@@ -7,66 +7,79 @@ import { fetchMessage } from '../utils/api';
 function ChatWindow() {
     const { currentChat } = useContext(ChatContext);
     const { socket } = useContext(SocketContext);
-    const { userId, isAuthenticated } = useAuth();
-
+    const { userId } = useAuth();
+    
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
-
+    
     const handleSend = () => {
-        if (message.trim() === '') return;
-
+        if (message.trim() === '' || !currentChat) return;
+        
+        const timestamp = new Date().toISOString();
+        
         const data = {
             senderId: userId,
             receiverId: currentChat._id,
             content: message,
+            timestamp 
         };
-
+        
         socket.emit("sendMessage", data);
-
-        // Optimistic UI update
+        
+        // Add message to local state immediately for UI responsiveness
         setMessages((prev) => [
             ...prev,
             {
-                text: message,
+                content: message,
                 senderId: userId,
                 receiverId: currentChat._id,
-                timestamp: new Date().toISOString(),
+                timestamp: timestamp,
             },
         ]);
-
+        
         setMessage('');
     };
-
+    
+    // Don't add useEffect dependency on locallyAddedMessages to avoid re-renders
     useEffect(() => {
         if (!socket || !currentChat || !userId) return;
-
+        
+        // Setup socket connection with user ID
         socket.emit("setup", userId);
-
+        
+        // Join the chat room
+        socket.emit("joinChat", currentChat._id);
+        
         const loadMessages = async () => {
             try {
+                console.log("Fetching messages for chat:", currentChat._id);
                 const res = await fetchMessage(currentChat._id);
-                setMessages(res);
+                console.log("Messages loaded:", res);
+                setMessages(res || []);
+                // Reset locally added messages when loading a new chat
             } catch (err) {
                 console.error("Failed to load messages", err);
+                setMessages([]);
             }
         };
-
+        
         loadMessages();
-        setMessages([]);
-
-        // Listener for incoming messages
-        socket.on("messageSent", (msg) => {
-            if (msg.senderId === currentChat._id || msg.receiverId === currentChat._id) {
+        
+        // Listen for incoming messages
+        socket.on("receiveMessage", (msg) => {
+            console.log("Received message:", msg);
+            
+            // Only add if it's from the other person, not our own messages
+            if (msg.senderId !== userId) {
                 setMessages((prev) => [...prev, msg]);
             }
         });
-        console.log(userId);
-
+        
         return () => {
-            socket.off("messageSent");
+            socket.off("receiveMessage");
         };
-    }, [socket, currentChat, userId]);
-
+    }, [socket, currentChat]);
+    
     return (
         <div className="flex flex-col h-dvh w-full rounded-2xl">
             {/* Header */}
@@ -75,7 +88,7 @@ function ChatWindow() {
                     {currentChat?.username || "Select a chat"}
                 </h2>
             </div>
-
+            
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
                 {messages.map((msg, index) => (
@@ -85,11 +98,11 @@ function ChatWindow() {
                             msg.senderId === userId ? 'bg-blue-600 ml-auto' : 'bg-gray-700'
                         }`}
                     >
-                        {msg.content || msg.text}
+                        {msg.content}
                     </div>
                 ))}
             </div>
-
+            
             {/* Input */}
             <div className="p-3 border-t border-gray-700 bg-gray-800 flex items-center mb-11 rounded-2xl">
                 <input

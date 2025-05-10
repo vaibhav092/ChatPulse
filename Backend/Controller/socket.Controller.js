@@ -1,6 +1,5 @@
 import { Message } from '../Models/message.Model.js';
 
-
 const userSocketMap = new Map();
     
 export const socketController = (io) => {
@@ -13,9 +12,9 @@ export const socketController = (io) => {
             console.log("Current users in map:", Array.from(userSocketMap.entries()));
         });
         
-
         socket.on("joinChat", (roomId) => {
             socket.join(roomId);
+            console.log(`Socket ${socket.id} joined room: ${roomId}`);
         });
 
         socket.on("sendMessage", async (data) => {
@@ -24,9 +23,9 @@ export const socketController = (io) => {
         
                 if (!senderId || !receiverId || !content) {
                     console.log("Missing data in sendMessage event");
-                    console.log(senderId);
-                    console.log(receiverId);
-                    console.log(content);
+                    console.log("senderId:", senderId);
+                    console.log("receiverId:", receiverId);
+                    console.log("content:", content);
                     return;
                 }
         
@@ -36,32 +35,66 @@ export const socketController = (io) => {
                     receiver: receiverId,
                     content
                 });
-        
-                // Emit the message back to the sender only
-                io.to(userSocketMap.get(receiverId)).emit("receiveMessage", {
+                
+                const messageData = {
                     content,
                     senderId,
                     receiverId,
                     timestamp: message.createdAt
-                });
-
+                };
+        
+                // Send to receiver if they're online
+                const receiverSocketId = userSocketMap.get(receiverId);
+                if (receiverSocketId) {
+                    io.to(receiverSocketId).emit("receiveMessage", messageData);
+                }
+                
+                // Also send back to sender for confirmation
+                socket.emit("receiveMessage", messageData);
         
             } catch (err) {
                 console.error("sendMessage error:", err.message);
             }
         });        
 
-        socket.on("fetchMessages", async ({ chatId }, callback) => {
+        socket.on("fetchMessages", async (chatId, callback) => {
             try {
-                const messages = await Message.find({ chatId }).sort({ createdAt: 1 });
-                callback(messages);
+                // Find messages where the user is either sender or receiver
+                const messages = await Message.find({
+                    $or: [
+                        { sender: chatId, receiver: socket.userId },
+                        { sender: socket.userId, receiver: chatId }
+                    ]
+                }).sort({ createdAt: 1 });
+                
+                // Format messages to match frontend expectations
+                const formattedMessages = messages.map(msg => ({
+                    content: msg.content,
+                    senderId: msg.sender,
+                    receiverId: msg.receiver,
+                    timestamp: msg.createdAt
+                }));
+                
+                if (typeof callback === 'function') {
+                    callback(formattedMessages);
+                }
             } catch (err) {
                 console.error("fetchMessages error:", err.message);
-                callback([]);
+                if (typeof callback === 'function') {
+                    callback([]);
+                }
             }
         });
 
         socket.on("disconnect", () => {
+            // Remove user from userSocketMap when they disconnect
+            for (const [userId, socketId] of userSocketMap.entries()) {
+                if (socketId === socket.id) {
+                    userSocketMap.delete(userId);
+                    console.log(`User ${userId} disconnected and removed from map`);
+                    break;
+                }
+            }
             console.log(`Socket Disconnected: ${socket.id}`);
         });
     });
