@@ -4,7 +4,7 @@ import Navbar from './components/Navbar.jsx'
 function Layout() {
     return (
         <div className="h-full flex flex-col">
-            <div className="h-11">
+            <div className="h-15">
                 <Navbar />
             </div>
             <div className="flex-1 overflow-hidden">

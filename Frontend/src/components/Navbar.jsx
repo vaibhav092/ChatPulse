@@ -20,14 +20,14 @@ function Navbar() {
     }
 
     return (
-        <nav className="bg-sky-500 text-white p-2 shadow-lg">
-            <div className="container mx-auto flex justify-between items-center">
+        <nav className="bg-sky-500 text-white p-2 shadow-lg h-15 ">
+            <div className="container mx-auto flex justify-between items-center mt-2">
                 <Link
                     to="/"
-                    className="flex items-center space-x-2 hover:text-sky-100"
+                    className="flex items-center space-x-2 hover:text-sky-100 ml-4"
                 >
                     <MessageSquare className="h-6 w-6" />
-                    <span className="text-xl font-bold">ChatApp</span>
+                    <span className="text-xl font-bold ">ChatApp</span>
                 </Link>
                 <div className="flex items-center space-x-4">
                     {!isAuthenticated ? (

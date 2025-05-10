@@ -44,6 +44,9 @@ app.use(cookieParser())
 import UserRouter from "./Router/user.router.js"
 app.use("/api/user",UserRouter)
 
+import MessageRouter from "./Router/message.router.js"
+app.use("/api/message",MessageRouter)
+
 async function connectDb() {
     try {
         const connect =await mongoose.connect(process.env.MONGO_URL,{

@@ -75,4 +75,9 @@ export const fetchContact = async () => {
     return res.data
 }
 
+export const fetchMessage=async (reciverId) => {
+    const res=await api.post("/message/fetchMessage",{reciverId})
+    return res.data
+}
+
 export default api

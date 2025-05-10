@@ -24,6 +24,9 @@ export const socketController = (io) => {
         
                 if (!senderId || !receiverId || !content) {
                     console.log("Missing data in sendMessage event");
+                    console.log(senderId);
+                    console.log(receiverId);
+                    console.log(content);
                     return;
                 }
         
@@ -35,13 +38,13 @@ export const socketController = (io) => {
                 });
         
                 // Emit the message back to the sender only
-                socket.emit("messageSent", {
-                    messageID: message._id,
+                io.to(userSocketMap.get(receiverId)).emit("receiveMessage", {
                     content,
                     senderId,
                     receiverId,
                     timestamp: message.createdAt
                 });
+
         
             } catch (err) {
                 console.error("sendMessage error:", err.message);

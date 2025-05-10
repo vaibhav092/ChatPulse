@@ -135,6 +135,7 @@ const islogin=asyncHandler(async (req,res) => {
         return res.status(202).json({isloggedin:false})
     }else{
         return res.status(202).json({
+            id:user._id,
             username:user.username,
             isloggedin:true
         })
